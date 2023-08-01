@@ -1,7 +1,9 @@
 package request
 
 import (
+	"bytes"
 	"fmt"
+	"github.com/vela-ssoc/vela-kit/auxlib"
 	"github.com/vela-ssoc/vela-kit/lua"
 	"os"
 	"strings"
@@ -21,6 +23,8 @@ func (r *Request) Index(L *lua.LState, key string) lua.LValue {
 		return L.NewFunction(r.exec)
 	case "H":
 		return L.NewFunction(r.H)
+	case "body":
+		return L.NewFunction(r.BodyL)
 	}
 
 	return nil
@@ -106,11 +110,25 @@ func (r *Request) exec(L *lua.LState) int {
 
 func (r *Request) H(L *lua.LState) int {
 	data := L.CheckString(1)
-	kv := strings.Split(data, ":")
+	key, val := auxlib.ParamValue(data)
+	r.SetHeader(key, val)
+	L.Push(r)
+	return 1
+}
 
-	if len(kv) == 2 {
-		r.SetHeader(kv[0], kv[1])
+func (r *Request) BodyL(L *lua.LState) int {
+	var buf bytes.Buffer
+	n := L.GetTop()
+	if n == 0 {
+		goto done
 	}
+
+	for i := 1; i <= n; i++ {
+		buf.WriteString(L.Get(i).String())
+	}
+
+	r.SetBody(buf.Bytes())
+done:
 	L.Push(r)
 	return 1
 }

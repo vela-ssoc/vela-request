@@ -82,6 +82,7 @@ func (r *Response) Index(L *lua.LState, key string) lua.LValue {
 
 	case "catch":
 		return L.NewFunction(r.catch)
+
 	}
 
 	if strings.HasPrefix(key, "http_") {

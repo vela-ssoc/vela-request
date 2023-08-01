@@ -2,10 +2,9 @@ package request
 
 import (
 	"bufio"
-	"bytes"
 	"crypto/tls"
-	"github.com/vela-ssoc/vela-kit/vela"
 	"github.com/vela-ssoc/vela-kit/lua"
+	"github.com/vela-ssoc/vela-kit/vela"
 	"net/http"
 	"strings"
 )
@@ -27,22 +26,8 @@ func ByParam(L *lua.LState) int {
 }
 
 func ByBody(L *lua.LState) int {
-	var buf bytes.Buffer
 	r := New().R()
-	n := L.GetTop()
-	if n == 0 {
-		goto done
-	}
-
-	for i := 1; i <= n; i++ {
-		buf.WriteString(L.Get(i).String())
-	}
-
-	r.SetBody(buf.Bytes())
-done:
-	L.Push(r)
-	return 1
-
+	return r.BodyL(L)
 }
 
 func ByInsecure(L *lua.LState) int {
